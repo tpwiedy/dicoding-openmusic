@@ -1,11 +1,11 @@
-const autoBind = require("auto-bind");
+const autoBind = require('auto-bind');
 
 class AlbumsHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
     autoBind(this);
-  };
+  }
 
   async postAlbumHandler(request, h) {
     this._validator.validatePostAlbumPayload(request.payload);
@@ -32,6 +32,19 @@ class AlbumsHandler {
       data: {
         album,
       },
+    };
+  }
+
+  async putAlbumByIdHandler(request) {
+    this._validator.validatePutAlbumPayload(request.payload);
+
+    const { id } = request.params;
+    const { name, year } = request.payload;
+    await this._service.editAlbumById(id, { name, year });
+
+    return {
+      status: 'success',
+      message: 'Album berhasil diperbarui',
     };
   }
 }
