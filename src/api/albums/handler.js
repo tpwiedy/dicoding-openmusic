@@ -48,14 +48,14 @@ class AlbumsHandler {
     };
   }
 
-  async deleteAlbumByIdHandler(request) { 
+  async deleteAlbumByIdHandler(request) {
     const { id } = request.params;
     await this._service.deleteAlbumById(id);
 
     return {
       status: 'success',
       message: 'Album berhasil dihapus',
-    }
+    };
   }
 }
 
