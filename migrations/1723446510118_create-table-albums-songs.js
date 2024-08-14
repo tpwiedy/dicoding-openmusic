@@ -36,21 +36,21 @@ exports.up = (pgm) => {
       type: 'INTEGER',
       notNull: true,
     },
-    genre: {
+    performer: {
       type: 'TEXT',
       notNull: true,
     },
-    performer: {
+    genre: {
       type: 'TEXT',
       notNull: true,
     },
     duration: {
       type: 'INTEGER',
-      notNull: true,
+      notNull: false,
     },
     albumId: {
       type: 'VARCHAR(50)',
-      notNull: true,
+      notNull: false,
       references: 'albums(id)',
     },
     created_at: {
@@ -62,7 +62,6 @@ exports.up = (pgm) => {
       notNull: true,
     },
   }),
-
   (exports.down = (pgm) => {
     pgm.dropTable('albums'), pgm.dropTable('songs');
   });
