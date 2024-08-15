@@ -48,7 +48,7 @@ exports.up = (pgm) => {
       type: 'INTEGER',
       notNull: false,
     },
-    albumId: {
+    album_id: {
       type: 'VARCHAR(50)',
       notNull: false,
       references: 'albums(id)',
