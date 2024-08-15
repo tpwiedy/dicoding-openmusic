@@ -8,7 +8,7 @@
     "start": "node ./src/server.js",
     "migrate": "node-pg-migrate",
     "start:dev": "nodemon ./src/server.js",
-    "lint": "eslint ./src"
+    "lint": "eslint ./"
   },
   "keywords": [],
   "author": "",

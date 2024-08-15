@@ -1,8 +1,8 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
-const InvariantError = require('../exceptions/InvariantError');
-const NotFoundError = require('../exceptions/NotFoundError');
-const { mapDBToModelAlbums } = require('../utils');
+const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
+const { mapDBToModelAlbums, mapDBToModelSongs } = require('../../utils');
 
 class AlbumsService {
   constructor() {
@@ -29,18 +29,43 @@ class AlbumsService {
   }
 
   async getAlbumById(id) {
-    const query = {
+    // Construct a query to retrieve the album from the database.
+    const albumQuery = {
       text: 'SELECT id,name,year FROM albums WHERE id = $1',
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    // Execute the album query and retrieve the result.
+    const albumResult = await this._pool.query(albumQuery);
 
-    if (!result.rows.length) {
+    // If no rows were returned, throw a NotFoundError.
+    if (!albumResult.rows.length) {
       throw new NotFoundError('Album tidak ditemukan');
     }
 
-    return result.rows.map(mapDBToModelAlbums)[0];
+    // Map the database result to a model object.
+    const album = albumResult.rows.map(mapDBToModelAlbums)[0];
+
+    // Construct a query to retrieve the songs associated with the album.
+    const songsQuery = {
+      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
+      values: [album.id],
+    };
+
+    // Execute the songs query and retrieve the result.
+    const songsResult = await this._pool.query(songsQuery);
+
+    // Map the database result to an array of model objects.
+    const songs = songsResult.rows.map(mapDBToModelSongs);
+
+    // Create a response object that includes the album and its associated songs.
+    const response = {
+      ...album, // Spread the album properties into the response object.
+      songs, // Add the songs array to the response object.
+    };
+
+    // Return the response object.
+    return response;
   }
 
   async editAlbumById(id, { name, year }) {
@@ -66,9 +91,6 @@ class AlbumsService {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
     }
   }
-
 }
-
-
 
 module.exports = AlbumsService;
