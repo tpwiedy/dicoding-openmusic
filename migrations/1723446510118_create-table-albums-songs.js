@@ -14,14 +14,6 @@ exports.up = (pgm) => {
       type: 'INTEGER',
       notNull: true,
     },
-    created_at: {
-      type: 'TEXT',
-      notNull: true,
-    },
-    updated_at: {
-      type: 'TEXT',
-      notNull: true,
-    },
   }),
   pgm.createTable('songs', {
     id: {
@@ -52,14 +44,7 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: false,
       references: 'albums(id)',
-    },
-    created_at: {
-      type: 'TEXT',
-      notNull: true,
-    },
-    updated_at: {
-      type: 'TEXT',
-      notNull: true,
+      onDelete: 'cascade',
     },
   }),
   (exports.down = (pgm) => {
