@@ -4,7 +4,6 @@ const { mapDBToModelSongs } = require('../../utils');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
 
-
 class SongsService {
   constructor() {
     this._pool = new Pool();
@@ -15,15 +14,7 @@ class SongsService {
 
     const query = {
       text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-      values: [
-        id,
-        title,
-        year,
-        performer,
-        genre,
-        duration,
-        albumId,
-      ],
+      values: [id, title, year, performer, genre, duration, albumId],
     };
 
     const result = await this._pool.query(query);
@@ -50,7 +41,9 @@ class SongsService {
       const result = await this._pool.query(query);
       return result.rows.map(mapDBToModelSongs);
     }
-    const result = await this._pool.query('SELECT id, title, performer FROM songs');
+    const result = await this._pool.query(
+      'SELECT id, title, performer FROM songs'
+    );
     return result.rows.map(mapDBToModelSongs);
   }
 
@@ -87,13 +80,11 @@ class SongsService {
       values: [id],
     };
     const result = await this._pool.query(query);
-    // console.log(result.rows[0]);
 
     if (!result.rows.length) {
       throw new NotFoundError('Lagu gagal dihapus. Id tidak ditemukan');
     }
   }
-
 }
 
 module.exports = SongsService;

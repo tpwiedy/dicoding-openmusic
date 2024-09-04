@@ -1,0 +1,14 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "Postgre Docker",
+      "username": "postgres",
+      "password": "12345",
+      "database": "openmusic"
+    }
+  ]
+}
