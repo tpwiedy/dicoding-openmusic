@@ -1,18 +1,5 @@
-const mapDBToModelSongs = ({
-  id,
-  title,
-  year,
-  performer,
-  genre,
-  duration,
-  album_id,
-}) => ({
-  id,
-  title,
-  year,
-  performer,
-  genre,
-  duration,
+const mapDBToModelSongs = ({ album_id, ...args }) => ({
+  ...args,
   albumId: album_id,
 });
 
