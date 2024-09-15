@@ -1,9 +1,11 @@
 const autoBind = require('auto-bind');
 
 class AlbumsHandler {
-  constructor(service, validator) {
-    this._service = service;
+  constructor(albumsService, songsService, validator) {
+    this._albumsService = albumsService;
+    this._songsService = songsService;
     this._validator = validator;
+
     autoBind(this);
   }
 
@@ -11,7 +13,7 @@ class AlbumsHandler {
     this._validator.validatePostAlbumPayload(request.payload);
 
     const { name, year } = request.payload;
-    const albumId = await this._service.addAlbum({ name, year });
+    const albumId = await this._albumsService.addAlbum({ name, year });
 
     const response = h.response({
       status: 'success',
@@ -26,7 +28,20 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request) {
     const { id } = request.params;
-    const album = await this._service.getAlbumById(id);
+
+    // Retrieve album and its songs
+    const album = await this._albumsService.getAlbumById(id);
+    const songs = await this._songsService.getSongsByAlbumId(id);
+
+    // Add cover url
+    album.songs = songs;
+    album.coverUrl = album.cover
+      ? (album.coverUrl = `http://${process.env.HOST}:${process.env.PORT}/uploads/images/${album.cover}`)
+      : null;
+
+    // Delete cover
+    delete album.cover;
+
     return {
       status: 'success',
       data: {
@@ -40,7 +55,7 @@ class AlbumsHandler {
 
     const { id } = request.params;
     const { name, year } = request.payload;
-    await this._service.editAlbumById(id, { name, year });
+    await this._albumsService.editAlbumById(id, { name, year });
 
     return {
       status: 'success',
@@ -50,7 +65,7 @@ class AlbumsHandler {
 
   async deleteAlbumByIdHandler(request) {
     const { id } = request.params;
-    await this._service.deleteAlbumById(id);
+    await this._albumsService.deleteAlbumById(id);
 
     return {
       status: 'success',

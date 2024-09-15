@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
-const { mapDBToModelSongs } = require('../../utils');
+// const { mapDBToModelSongs } = require('../../utils');
 
 class AlbumsService {
   constructor() {
@@ -27,41 +27,35 @@ class AlbumsService {
   }
 
   async getAlbumById(id) {
-    const albumQuery = {
+    const query = {
       text: 'SELECT * FROM albums WHERE id = $1',
       values: [id],
     };
 
     // Execute the album query and retrieve the result.
-    const albumResult = await this._pool.query(albumQuery);
+    const result = await this._pool.query(query);
 
-    if (!albumResult.rows.length) {
+    if (!result.rows.length) {
       throw new NotFoundError('Album tidak ditemukan');
     }
 
-    // Map the database result to a model object.
-    const album = albumResult.rows[0];
+    return result.rows[0];
+  }
 
-    const songsQuery = {
-      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
-      values: [album.id],
+  async addCoverAlbum(id, cover) {
+    const query = {
+      text: 'UPDATE albums SET cover = $1 WHERE id = $2 RETURNING id',
+      values: [cover, id],
     };
 
-    const songsResult = await this._pool.query(songsQuery);
+    const result = await this._pool.query(query);
 
-    // Map the database result to an array of model objects.
-    const songs = songsResult.rows.map(mapDBToModelSongs);
-
-    // Create a response object that includes the album and its associated songs.
-    const response = {
-      ...album, // Spread the album properties into the response object.
-      songs, // Add the songs array to the response object.
-    };
-    return response;
+    if (!result.rows.length) {
+      throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
+    }
   }
 
   async editAlbumById(id, { name, year }) {
-
     const query = {
       text: 'UPDATE albums SET name = $1, year = $2 WHERE id = $3 RETURNING id, name, year',
       values: [name, year, id],

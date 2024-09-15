@@ -1,0 +1,1 @@
+UPDATE albums SET cover = 1726358278302nodejs.png WHERE id = album-OaZ914OmyQ-kcb8O
