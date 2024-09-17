@@ -17,7 +17,6 @@ class UploadsHandler {
 
     // retrieve previouse cover album
     const oldCoverAlbum = await this._albumsService.getAlbumById(id);
-    console.log('Retrieved old cover album:', { oldCoverAlbum });
 
     // upload new cover
     const filename = await this._storageService.writeFile(cover, cover.hapi);

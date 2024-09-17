@@ -1,1 +1,0 @@
-SELECT * FROM albums WHERE id = 'album-KNePoebNEk6rYyUC';
