@@ -34,6 +34,7 @@ class AlbumsHandler {
     const songs = await this._songsService.getSongsByAlbumId(id);
 
     // Add cover url
+    // Merge album and songs
     album.songs = songs;
     album.coverUrl = album.cover
       ? (album.coverUrl = `http://${process.env.HOST}:${process.env.PORT}/uploads/images/${album.cover}`)
@@ -101,7 +102,7 @@ class AlbumsHandler {
 
   async getLikesAlbumHandler(request, h) {
     const { id } = request.params;
-    const { albumLikes } = await this._albumsService.getAlbumLikesById(id);
+    const { albumLikes, source } = await this._albumsService.getAlbumLikesById(id);
 
     const response = h.response({
       status: 'success',
@@ -110,6 +111,7 @@ class AlbumsHandler {
       },
     });
 
+    response.header('X-Data-Source', source);
     return response;
   }
 }
