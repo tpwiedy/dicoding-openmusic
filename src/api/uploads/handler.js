@@ -25,7 +25,7 @@ class UploadsHandler {
     // delete previous cover album if exists
     const isCoverExists = oldCoverAlbum.cover;
     if (isCoverExists) {
-      await this._storageService.deleteFile(oldCoverAlbum.cover);
+      await this._storageService.deleteFile(isCoverExists);
     }
 
     const response = h.response({
