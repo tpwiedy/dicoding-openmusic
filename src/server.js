@@ -3,6 +3,7 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 const path = require('path');
+const config = require('./utils/config');
 const ClientError = require('./exceptions/ClientError');
 
 // Albums
@@ -62,8 +63,8 @@ const init = async () => {
   const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/images'));
 
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
+    port: config.app.port,
+    host: config.app.host,
     routes: {
       cors: {
         origin: ['*'],
@@ -82,12 +83,12 @@ const init = async () => {
   ]);
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
-    keys: process.env.ACCESS_TOKEN_KEY,
+    keys: config.jwt.accessTokenKey,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.jwt.accessTokenAge,
     },
     validate: (artifacts) => ({
       isValid: true,
@@ -174,7 +175,7 @@ const init = async () => {
         message: response.message,
       });
       newResponse.code(response.statusCode);
-      console.log(response);
+      // console.log(response);
       return newResponse;
     }
     return h.continue;

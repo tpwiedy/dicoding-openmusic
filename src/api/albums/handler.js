@@ -1,4 +1,5 @@
 const autoBind = require('auto-bind');
+const config = require('../../utils/config');
 
 class AlbumsHandler {
   constructor(albumsService, songsService, validator) {
@@ -37,7 +38,7 @@ class AlbumsHandler {
     // Merge album and songs
     album.songs = songs;
     album.coverUrl = album.cover
-      ? (album.coverUrl = `http://${process.env.HOST}:${process.env.PORT}/uploads/images/${album.cover}`)
+      ? (album.coverUrl = `http://${config.app.host}:${config.app.port}/uploads/images/${album.cover}`)
       : null;
 
     // Delete cover
