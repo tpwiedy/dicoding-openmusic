@@ -1,9 +1,12 @@
 const autoBind = require('auto-bind');
+const config = require('../../utils/config');
 
 class AlbumsHandler {
-  constructor(service, validator) {
-    this._service = service;
+  constructor(albumsService, songsService, validator) {
+    this._albumsService = albumsService;
+    this._songsService = songsService;
     this._validator = validator;
+
     autoBind(this);
   }
 
@@ -11,7 +14,7 @@ class AlbumsHandler {
     this._validator.validatePostAlbumPayload(request.payload);
 
     const { name, year } = request.payload;
-    const albumId = await this._service.addAlbum({ name, year });
+    const albumId = await this._albumsService.addAlbum({ name, year });
 
     const response = h.response({
       status: 'success',
@@ -26,7 +29,21 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request) {
     const { id } = request.params;
-    const album = await this._service.getAlbumById(id);
+
+    // Retrieve album and its songs
+    const album = await this._albumsService.getAlbumById(id);
+    const songs = await this._songsService.getSongsByAlbumId(id);
+
+    // Add cover url
+    // Merge album and songs
+    album.songs = songs;
+    album.coverUrl = album.cover
+      ? (album.coverUrl = `http://${config.app.host}:${config.app.port}/uploads/images/${album.cover}`)
+      : null;
+
+    // Delete cover
+    delete album.cover;
+
     return {
       status: 'success',
       data: {
@@ -40,7 +57,7 @@ class AlbumsHandler {
 
     const { id } = request.params;
     const { name, year } = request.payload;
-    await this._service.editAlbumById(id, { name, year });
+    await this._albumsService.editAlbumById(id, { name, year });
 
     return {
       status: 'success',
@@ -50,13 +67,53 @@ class AlbumsHandler {
 
   async deleteAlbumByIdHandler(request) {
     const { id } = request.params;
-    await this._service.deleteAlbumById(id);
+    await this._albumsService.deleteAlbumById(id);
 
     return {
       status: 'success',
       message: 'Album berhasil dihapus',
     };
   }
-}
 
+  async postLikeAlbumHandler(request, h) {
+    const { id: credentialId } = request.auth.credentials;
+    const { id } = request.params;
+
+    await this._albumsService.addAlbumLike(credentialId, id);
+
+    const response = h.response({
+      status: 'success',
+      message: 'Berhasil menyukai album',
+    });
+    response.code(201);
+    return response;
+  }
+
+  async deleteLikeAlbumHandler(request) {
+    const { id } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._albumsService.deleteAlbumLike(credentialId, id);
+
+    return {
+      status: 'success',
+      message: 'Batal menyukai album',
+    };
+  }
+
+  async getLikesAlbumHandler(request, h) {
+    const { id } = request.params;
+    const { albumLikes, source } = await this._albumsService.getAlbumLikesById(id);
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        likes: albumLikes.length,
+      },
+    });
+
+    response.header('X-Data-Source', source);
+    return response;
+  }
+}
 module.exports = AlbumsHandler;
