@@ -14,6 +14,7 @@ class PlaylistsHandler {
 
     const { name } = request.payload;
     const { id: credentialId } = request.auth.credentials;
+
     const playlistId = await this._playlistsService.addPlaylist({
       name,
       owner: credentialId,
@@ -30,16 +31,19 @@ class PlaylistsHandler {
     return response;
   }
 
-  async getPlaylistsHandler(request) {
+  async getPlaylistsHandler(request, h) {
     const { id: credentialId } = request.auth.credentials;
-    const playlists = await this._playlistsService.getPlaylists(credentialId);
+    const { playlists, source } =
+      await this._playlistsService.getPlaylists(credentialId);
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         playlists,
       },
-    };
+    });
+    response.header('X-Data-Source', source);
+    return response;
   }
 
   async deletePlaylistByIdHandler(request) {
@@ -63,7 +67,6 @@ class PlaylistsHandler {
     const { id: credentialId } = request.auth.credentials;
 
     await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
-    await this._songsService.getSongById(songId);
     await this._playlistsService.addSongToPlaylist(playlistId, songId);
 
     // Menambahkan activity 'add' ke action playlist
@@ -82,21 +85,23 @@ class PlaylistsHandler {
     return response;
   }
 
-  async getSongsFromPlaylistHandler(request) {
+  async getSongsFromPlaylistHandler(request, h) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
     await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
 
-    const playlist =
+    const { playlistWithSongs, source } =
       await this._playlistsService.getSongsFromPlaylist(playlistId);
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
-        playlist,
+        playlist: playlistWithSongs,
       },
-    };
+    });
+    response.header('X-Data-Source', source);
+    return response;
   }
 
   async deleteSongFromPlaylistHandler(request) {
@@ -121,20 +126,22 @@ class PlaylistsHandler {
     };
   }
 
-  async getActivitiesHandler(request) {
+  async getActivitiesHandler(request, h) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
     await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
-    const activities =
+    const { activities, source } =
       await this._playlistsService.getActivitiesInPlaylist(playlistId);
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         playlistId,
         activities,
       },
-    };
+    });
+    response.header('X-Data-Source', source);
+    return response;
   }
 }
 module.exports = PlaylistsHandler;

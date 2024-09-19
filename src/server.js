@@ -51,7 +51,6 @@ const Inert = require('@hapi/inert');
 // Cache
 const CacheService = require('./services/redis/CacheService');
 
-
 const init = async () => {
   const cacheService = new CacheService();
   const albumsService = new AlbumsService(cacheService);
@@ -59,8 +58,14 @@ const init = async () => {
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationsService();
-  const playlistsService = new PlaylistsService(collaborationsService, songsService);
-  const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
+  const playlistsService = new PlaylistsService(
+    collaborationsService,
+    songsService,
+    cacheService
+  );
+  const storageService = new StorageService(
+    path.resolve(__dirname, 'api/uploads/file/images')
+  );
 
   const server = Hapi.server({
     port: config.app.port,
@@ -78,8 +83,8 @@ const init = async () => {
       plugin: Jwt,
     },
     {
-      plugin: Inert
-    }
+      plugin: Inert,
+    },
   ]);
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
@@ -154,16 +159,16 @@ const init = async () => {
         producerService: ProducerService,
         playlistsService,
         validator: ExportsValidator,
-      }
+      },
     },
     {
       plugin: uploads,
       options: {
         storageService,
         albumsService,
-        validator: UploadsValidator
-      }
-    }
+        validator: UploadsValidator,
+      },
+    },
   ]);
 
   server.ext('onPreResponse', (request, h) => {
@@ -175,7 +180,7 @@ const init = async () => {
         message: response.message,
       });
       newResponse.code(response.statusCode);
-      // console.log(response);
+      console.log(response);
       return newResponse;
     }
     return h.continue;
